@@ -59,5 +59,8 @@ where email = '${escapeSql(emailNormalizado)}';`);
 
 main().catch((error) => {
   console.error('Erro ao testar login do admin:', error.message);
+  if (error.details) {
+    console.error('Detalhes:', error.details);
+  }
   process.exitCode = 1;
 });

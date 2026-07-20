@@ -8,7 +8,8 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "admin:sql": "node scripts/createAdminSql.js",
-    "admin:check": "node scripts/checkAdminLogin.js"
+    "admin:check": "node scripts/checkAdminLogin.js",
+    "admin:sync-plain": "node scripts/syncPlainAdmins.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
