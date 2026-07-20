@@ -17,11 +17,12 @@ async function main() {
     return;
   }
 
+  const emailNormalizado = email.trim().toLowerCase();
   const senhaHash = await bcrypt.hash(senha, 10);
 
   console.log('\nCole este SQL no SQL Editor do Supabase:\n');
   console.log(`insert into admins (nome, email, senha_hash)
-values ('${escapeSql(nome)}', '${escapeSql(email)}', '${escapeSql(senhaHash)}')
+values ('${escapeSql(nome.trim())}', '${escapeSql(emailNormalizado)}', '${escapeSql(senhaHash)}')
 on conflict (email)
 do update set
   nome = excluded.nome,
