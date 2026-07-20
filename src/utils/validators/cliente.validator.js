@@ -22,7 +22,7 @@ const criarClienteSchema = z.object({
 
   dataNascimento: dataNascimentoSchema,
 
-  email: z.string().trim().email('E-mail inválido.'),
+  email: z.string().trim().toLowerCase().email('E-mail inválido.'),
 });
 
 module.exports = { criarClienteSchema };

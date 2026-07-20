@@ -1,4 +1,5 @@
 const ClienteRepository = require('../repositories/cliente.repository');
+const AppError = require('../utils/AppError');
 
 const ClienteService = {
   /**
@@ -6,11 +7,26 @@ const ClienteService = {
    * @param {{nome: string, whatsapp: string, dataNascimento: string, email: string}} dados
    */
   async cadastrar(dados) {
+    const email = dados.email.trim().toLowerCase();
+    const whatsapp = dados.whatsapp.trim();
+    const [clienteComEmail, clienteComWhatsapp] = await Promise.all([
+      ClienteRepository.buscarPorEmail(email),
+      ClienteRepository.buscarPorWhatsapp(whatsapp),
+    ]);
+
+    if (clienteComEmail) {
+      throw new AppError('Este e-mail já está cadastrado.', 409);
+    }
+
+    if (clienteComWhatsapp) {
+      throw new AppError('Este WhatsApp já está cadastrado.', 409);
+    }
+
     const cliente = await ClienteRepository.criar({
       nome: dados.nome,
-      whatsapp: dados.whatsapp,
+      whatsapp,
       data_nascimento: dados.dataNascimento,
-      email: dados.email,
+      email,
     });
 
     return {

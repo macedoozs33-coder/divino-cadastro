@@ -14,6 +14,8 @@ create table if not exists clientes (
 
 create index if not exists clientes_nome_idx on clientes (nome);
 create index if not exists clientes_whatsapp_idx on clientes (whatsapp);
+create unique index if not exists clientes_whatsapp_unique_idx on clientes (whatsapp);
+create unique index if not exists clientes_email_lower_unique_idx on clientes (lower(email));
 create index if not exists clientes_data_nascimento_idx on clientes (data_nascimento);
 
 create table if not exists admins (

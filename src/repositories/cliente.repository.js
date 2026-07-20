@@ -19,6 +19,10 @@ const ClienteRepository = {
       .select()
       .single();
 
+    if (error?.code === '23505') {
+      throw new AppError('Já existe um cliente cadastrado com este e-mail ou WhatsApp.', 409);
+    }
+
     if (error) throw new AppError('Erro ao criar cliente.', 500, error.message);
     return data;
   },
@@ -39,6 +43,19 @@ const ClienteRepository = {
       .from('clientes')
       .select('*')
       .eq('email', email)
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw new AppError('Erro ao buscar cliente.', 500, error.message);
+    return data;
+  },
+
+  async buscarPorWhatsapp(whatsapp) {
+    const { data, error } = await supabase
+      .from('clientes')
+      .select('*')
+      .eq('whatsapp', whatsapp)
+      .limit(1)
       .maybeSingle();
 
     if (error) throw new AppError('Erro ao buscar cliente.', 500, error.message);
