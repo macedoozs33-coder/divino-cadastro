@@ -5,6 +5,10 @@ const AdminRepository = require('../src/repositories/admin.repository');
 
 const [, , email, senha] = process.argv;
 
+function escapeSql(value) {
+  return String(value).replace(/'/g, "''");
+}
+
 function mostrarAjuda() {
   console.log('Uso: npm run admin:check -- "email@exemplo.com" "senha123"');
 }
@@ -34,6 +38,12 @@ async function main() {
   console.log(`senha confere: ${senhaConfere ? 'sim' : 'nao'}`);
 
   if (!senhaConfere) {
+    const novoHash = await bcrypt.hash(senha, 10);
+    console.log('\nPara corrigir esse admin, cole este SQL no Supabase SQL Editor:\n');
+    console.log(`update admins
+set senha_hash = '${escapeSql(novoHash)}'
+where email = '${escapeSql(emailNormalizado)}';`);
+    console.log('\nDepois rode o admin:check novamente com a mesma senha.\n');
     process.exitCode = 1;
   }
 }
