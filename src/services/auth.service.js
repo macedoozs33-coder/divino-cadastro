@@ -3,23 +3,37 @@ const PasswordHasher = require('../utils/passwordHasher');
 const JwtService = require('../utils/jwtService');
 const AppError = require('../utils/AppError');
 
-const AuthService = {
-  /**
-   * Autentica um admin por email/senha e retorna o token JWT.
-   * Lança AppError 401 se as credenciais forem inválidas.
-   */
-  async login({ email, senha }) {
-    const admin = await AdminRepository.buscarPorEmail(email);
+function normalizarEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
 
-    // Mensagem genérica proposital: não revelar se o e-mail existe ou não.
+function emailsAdminPermitidos() {
+  return String(process.env.ADMIN_EMAIL || '')
+    .split(',')
+    .map(normalizarEmail)
+    .filter(Boolean);
+}
+
+function pareceHashBcrypt(valor) {
+  return /^\$2[aby]\$\d{2}\$/.test(valor || '');
+}
+
+const AuthService = {
+  async login({ email, senha }) {
+    const emailNormalizado = normalizarEmail(email);
+    const admin = await AdminRepository.buscarPorEmail(emailNormalizado);
+
     if (!admin) {
-      throw new AppError('E-mail ou senha inválidos.', 401);
+      throw new AppError('E-mail ou senha invalidos.', 401);
     }
 
-    const senhaCorreta = await PasswordHasher.comparar(senha, admin.senha_hash);
+    const adminPermitido = emailsAdminPermitidos().includes(emailNormalizado);
+    const senhaCorreta = pareceHashBcrypt(admin.senha_hash)
+      ? await PasswordHasher.comparar(senha, admin.senha_hash)
+      : adminPermitido && senha === admin.senha_hash;
 
     if (!senhaCorreta) {
-      throw new AppError('E-mail ou senha inválidos.', 401);
+      throw new AppError('E-mail ou senha invalidos.', 401);
     }
 
     const token = JwtService.gerarToken({ sub: admin.id, email: admin.email });

@@ -9,6 +9,13 @@ function escapeSql(value) {
   return String(value).replace(/'/g, "''");
 }
 
+function emailsAdminPermitidos() {
+  return String(process.env.ADMIN_EMAIL || '')
+    .split(',')
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
+}
+
 function mostrarAjuda() {
   console.log('Uso: npm run admin:check -- "email@exemplo.com" "senha123"');
 }
@@ -29,11 +36,13 @@ async function main() {
   }
 
   const hashPareceBcrypt = /^\$2[aby]\$\d{2}\$/.test(admin.senha_hash || '');
+  const adminPermitido = emailsAdminPermitidos().includes(emailNormalizado);
   const senhaConfere = hashPareceBcrypt
     ? await bcrypt.compare(senha, admin.senha_hash)
-    : false;
+    : adminPermitido && senha === admin.senha_hash;
 
   console.log(`Admin encontrado: ${admin.nome} <${admin.email}>`);
+  console.log(`email liberado no ADMIN_EMAIL: ${adminPermitido ? 'sim' : 'nao'}`);
   console.log(`senha_hash parece bcrypt: ${hashPareceBcrypt ? 'sim' : 'nao'}`);
   console.log(`senha confere: ${senhaConfere ? 'sim' : 'nao'}`);
 
