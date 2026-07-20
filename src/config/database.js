@@ -1,0 +1,22 @@
+const { createClient } = require('@supabase/supabase-js');
+
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  throw new Error(
+    'SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY precisam estar definidos no .env'
+  );
+}
+
+/**
+ * Cliente Supabase usando a service_role key.
+ * Essa chave ignora Row Level Security — por isso NUNCA deve ser exposta
+ * ao frontend. Só o backend a utiliza.
+ */
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  {
+    auth: { persistSession: false },
+  }
+);
+
+module.exports = supabase;
